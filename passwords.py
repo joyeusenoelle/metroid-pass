@@ -44,13 +44,15 @@ class PasswordMgr:
         """Create the password manager."""
         self.items = {}
 
-    def add_item(self, name: str, value: str|int|bool, maximum: int|NoneType):
+    def add_item(self, name: str, value: str|int|bool, maximum: int|NoneType = None):
         """Add a new item to the password.
         
         Parameters:
             - name (str): The name of the item.
-            - type (str): The type of the item ("str", "int", "bool")
+            - value (str|int|bool): The initial value of the item.
+            - maximum (int|None): The maximum value of the item (default: None).
 
+        This cannot be used to modify an existing item; for that, use modify_item().
         """
         if name not in self.items:
             item_type = type(value)
@@ -63,6 +65,18 @@ class PasswordMgr:
             raise ValueError(f"Item {name} already exists in the password.")
 
     def modify_item(self, name: str, value: str|int|bool):
+        """Modify an item already in the password.
+        
+        Parameters:
+            - name (str): The name of the item to modify.
+            - value (str|int|bool): The value to set the item to.
+
+        This cannot be used to add a new item; for that, use add_item().
+        This cannot be used to change an item's type. It will raise a 
+        ValueError if you attempt to set an item to a different type.
+        If you have set a maximum value, this will not increase the item's value
+        beyond that limit, and will raise a ValueError if you attempt to.
+        """
         if name not in self.items:
             raise ValueError(f"Item {name} has not been added to the password yet.")
         else:
@@ -70,8 +84,8 @@ class PasswordMgr:
             item_max = curItem.maximum
             item_type = curItem.item_type
             if type(value) == item_type:
-                if type(value) is int and maximum is not None and value > maximum):
-                    raise ValueError(f"Item {name} has a maximum of {maximum} (you wanted to set it to {value}).")
+                if type(value) is int and item_max is not None and value > item_max):
+                    raise ValueError(f"Item {name} has a maximum of {item_max} (you wanted to set it to {value}).")
                 else:
                     curItem.value = value
                     self.items[name] = curItem
